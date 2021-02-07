@@ -15,6 +15,11 @@ To run the system:
 - Copy the ds-project-train.csv and ds-project-validation.csv files to the data/raw directory
   - Ideally these would be downloaded from a common source such as an S3 bucket.  I could create a role for Altana to have access to my AWS s3 bucket.
 
+- I recommend recommend create a virtualenv to run the project in.  Go to the top project directory and enter (might also want to adjust the python to used for the venv with the -p option).  The sytem was developed with python3.6:
+
+> virtualenv venv
+> source venv/bin/activate
+
 - Install the needed python modules.  Go to the top project directory and run:
 
 > pip install -r requirements.txt
