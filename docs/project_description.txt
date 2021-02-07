@@ -1,0 +1,27 @@
+Machine Learning Project
+
+
+This project is intended to replicate the type of work a Machine Learning Engineer would undertake building models and data processing systems on top of shipment data.  We have shared with you a dataset that consists of shipment records: each row of the dataset contains the details for a shipment of goods from a shipper (the company that sent the good) to a consignee (the receiving party) including details about the product, carrier, port, etc. The definition of the columns is in the provided data dictionary.   
+
+The goal of the project is to build a well-engineered module that takes fields from the dataset and predicts the  “COUNTRY.OF.ORIGIN” field.  Your objective should be to demonstrate good code structure and usage of idiomatic machine learning.  The performance of the model is secondary -- we’d like to see that you know how to assess performance, but we don’t expect a high performing model.
+
+Please train a model on the ds-project-train.csv and predict on the ds-project-validation.csv, then please use standard machine learning measures of performance to assess how you did.
+
+Please use the input fields:
+
+WEIGHT..KG: numeric feature
+ARRIVAL.DATE: temporal feature
+US.PORT: one-hot encodings will be fine
+
+Bonus points if you also use “PRODUCT.DETAILS”, which will require usage of NLP techniques (simple ones are fine).
+
+For the “COUNTRY.OF.ORIGIN.FIELD”: Some countries will have many examples, others will only have a few.  We leave it to you on how to handle these rare country cases, but we do note that an “other” category may be a reasonable choice for countries with few mentions.
+
+Your Deliverable:
+Please commit your code to a private git repository and either email it or share it on github with your coordinator, recruiter, or hiring manager at least a day before your interview.  Your repository should include a README explaining how to set up the project, run it, and evaluate it.  For example, you might include python code with a requirements.txt and a bash script to build and run it.
+
+
+Note on the application:
+
+Prediction of country of origin is a use case encountered often since tariffs are usually declared based on the country goods come from, thus if someone wants to avoid tariffs or restrictions they might declare another country, if one can predict with decent accuracy the country of origin it is then possible to flag shipments with unlikely origins. 
+
