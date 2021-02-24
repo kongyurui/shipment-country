@@ -20,10 +20,10 @@ logger = get_logger()
 class ShipmentTrainer():
     def __init__(self):
         self.preprocessor = Preprocessor()
-    
+
     def _load_training_set(self, training_file: str = "../data/processed/training.pkl"):
         self.train_df = pd.read_pickle(training_file)
-        
+
     def _create_model_path(self):
         """Store each model version in a separate directory, keep copy of config, model, label encoder and metrics"""
         today = datetime.datetime.utcnow()
@@ -34,17 +34,17 @@ class ShipmentTrainer():
         if os.path.exists(model_path):
             logger.error("Model path already exists", model_path=model_path)
             quit()
-            
+
         os.makedirs(model_path)
-        
+
         return version, model_path
-        
+
     def _fit_label_encoder(self, model_path: str):
         """Replace low frequency countries with "OTHER"
         Map country names to index number
         Save encoder for use in prediction
         """
-        
+
         # Replace countries occurring less than N times with "OTHER"
         self.train_df['COUNTRY.OF.ORIGIN'].fillna('OTHER', inplace=True)
         country_counts = pd.DataFrame(self.train_df['COUNTRY.OF.ORIGIN'].value_counts())
@@ -56,36 +56,36 @@ class ShipmentTrainer():
         label_encoder = LabelEncoder()
         country_labels = label_encoder.fit_transform(self.train_df['COUNTRY.OF.ORIGIN.MAPPED'])
         pickle.dump(label_encoder, open(os.path.join(model_path, LABEL_FILE), "wb"))
-        
+
         return country_labels
 
     def train(self):
-        """Method to train model.  
+        """Method to train model.
         - Loads the training data
         - Creates a new directory for the model
         - Creates a pipeline for model training
         - Fits the model to the data
         - Saves the model to disk as a pickle file
-        
+
         :returns: version - The version of the trained model
         """
-        
+
         self._load_training_set()
-        
+
         version, model_path = self._create_model_path()
         country_labels = self._fit_label_encoder(model_path)
-        
+
         # Process input df to add arrival date derived features, clean up product details
-        self.preprocessor.preprocess(self.train_df)
+        preprocessed_train_df = self.preprocessor.preprocess(self.train_df)
 
         # Includes US.PORT and the ARRIVAL.DATE derived day/month/quarter (could also try WEEKOFYEAR)
-        # With more time, would be able to select the features in a separate configuration that can be 
+        # With more time, would be able to select the features in a separate configuration that can be
         # easily edited, or used for a grid search
-        category_columns = ['US.PORT', 'ARRIVAL.DAY', 'ARRIVAL.MONTH', 'ARRIVAL.QUARTER'] 
+        category_columns = ['US.PORT', 'ARRIVAL.DAY', 'ARRIVAL.DAYOFWEEK', 'ARRIVAL.MONTH', 'ARRIVAL.QUARTER']
         category_pipeline = Pipeline([
             ('cat_encoder', OneHotEncoder(handle_unknown='ignore'))
         ])
-        
+
         numerical_columns = ['WEIGHT..KG.']
         numerical_pipeline = Pipeline([
             ('poly', PolynomialFeatures(degree = 2)),
@@ -95,9 +95,9 @@ class ShipmentTrainer():
         text_columns = 'PRODUCT.DETAILS.SPACED'
         text_pipeline = Pipeline([
             # Other options here would be to try different vocabulary sizes, bigrams
-            ('text_encoder', TfidfVectorizer(min_df=10, max_features=10000))  
+            ('text_encoder', TfidfVectorizer(min_df=10, max_features=10000))
         ])
-        
+
         combined_pipeline = ColumnTransformer(transformers=[
             ('category_pipeline', category_pipeline, category_columns),
             ('numerical_pipeline', numerical_pipeline, numerical_columns),
@@ -111,11 +111,11 @@ class ShipmentTrainer():
             ('classification', LogisticRegression(class_weight='balanced', max_iter=1000)),  # , C=10
         ])
 
-        self.model.fit(self.train_df, country_labels)
-        logger.info("Score on training set", training_score=self.model.score(self.train_df, country_labels))
-        
+        self.model.fit(preprocessed_train_df, country_labels)
+        logger.info("Score on training set", training_score=self.model.score(preprocessed_train_df, country_labels))
+
         # With more time, would also investigate which features were most useful for model prediction
-                    
+
         pickle.dump(self.model, open(os.path.join(model_path, MODEL_FILE), "wb"))
-        
+
         return version

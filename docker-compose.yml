@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  train:
+
+
+  app:
+    build:
+      context: .
+      dockerfle: Dockerfile
+    ports:
+      - "80:8000"
+
+  

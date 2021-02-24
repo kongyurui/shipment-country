@@ -26,15 +26,11 @@ class DataAcquisition():
         # Replace empty US.PORT with "UNKNOWN"
         shipment_df['US.PORT'].fillna('UNKNOWN', inplace=True)
         # Here also map the ARRIVAL.DATE to the internal pandas DateTime format
-        shipment_df['ARRIVAL.DATE.PROCESSED']= pd.to_datetime(shipment_df['ARRIVAL.DATE'])
-        
+        shipment_df['ARRIVAL.DATE.PROCESSED'] = pd.to_datetime(shipment_df['ARRIVAL.DATE'])
+
         shipment_df['WEIGHT..KG.'].fillna(0, inplace=True)
-        
+
         processed_path = os.path.join("..", "data", "processed",  dataset_type + ".pkl")
         shipment_df.to_pickle(processed_path)
 
         logger.info("Total data points", dataset_type=dataset_type, count=shipment_df.shape[0])
-        
-
-        
-        

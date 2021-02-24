@@ -13,13 +13,13 @@ logger = get_logger()
 
 class Evaluator():
     "Evaluate a specific model over a validation set, saving metrics with the model."
-    
+
     def __init__(self):
         self.predictor = Predictor()
-        
+
     def _load_eval_set(self, eval_file):
         self.eval_df = pd.read_pickle(eval_file)
-        
+
     def evaluate(self, version):
         """- Load validation data frame
         - Maps previously unseed countries to OTHER
@@ -32,7 +32,7 @@ class Evaluator():
         """
         self.predictor.load_model(version)
         self._load_eval_set(f"{DATA_DIR}/validation.pkl")
-        
+
         # Deal with issue of countries unseen in training data
         self.eval_df['COUNTRY.OF.ORIGIN'].fillna('OTHER', inplace=True)
         seen_countries = set(self.predictor.label_encoder.classes_)
@@ -41,19 +41,16 @@ class Evaluator():
         gold_labels = self.predictor.label_encoder.transform(self.eval_df['COUNTRY.OF.ORIGIN.MAPPED'])
 
         predictions = self.predictor.predict(self.eval_df)
-    
+
         conf_mat = confusion_matrix(gold_labels, predictions)
         logger.info("Confusion matrix", confusion_matrix=conf_mat)
 
-        report = metrics.classification_report(gold_labels, predictions, 
+        report = metrics.classification_report(gold_labels, predictions,
                                                target_names=self.predictor.label_encoder.classes_)
         logger.info("Classification report", report=report)
-        
+
         metrics_path = os.path.join(MODEL_DIR, version, METRICS_FILE)
         # Having trouble getting full matrix to print, will do later
         with open(metrics_path, "w") as metrics_fd:
             metrics_fd.write(f"* Confusion matrix:\n{conf_mat}\n")
             metrics_fd.write(f"* Classification report:\n{report}")
-        
-
-        

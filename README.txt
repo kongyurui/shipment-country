@@ -15,19 +15,25 @@ To run the system:
 - Copy the ds-project-train.csv and ds-project-validation.csv files to the data/raw directory
   - Ideally these would be downloaded from a common source such as an S3 bucket.  I could create a role for Altana to have access to my AWS s3 bucket.
 
-- I recommend recommend create a virtualenv to run the project in.  Go to the top project directory and enter (might also want to adjust the python to used for the venv with the -p option).  The sytem was developed with python3.6:
+Option 1:  Use the shell
+  - I recommend creating a virtualenv to run the project in.  Go to the top project directory and enter (might also want to adjust the python to used for the venv with the -p option):  (The sytem was developed with python3.6)
 
-> virtualenv venv
-> source venv/bin/activate
+  > virtualenv venv
+  > source venv/bin/activate
 
-- Install the needed python modules.  Go to the top project directory and run:
+  - Install the needed python modules.  Go to the top project directory and run:
 
-> pip install -r requirements.txt
+  > pip install -r requirements.txt
 
-- Next change directories to "src".  You should be able to run the full project pipeline with one command (using the __main__.py file):
+  - Next change directories to "src".  You should be able to run the full project pipeline with one command (using the __main__.py file):
 
-> python . -p
+  > python . -p
 
-This processes and cleans the training and validation sets, runs the training script, and evaluates the model produced from the training scripts.
+Option 2:  Use docker
+  - docker build -t shipment-train .
+  - docker run -it --rm --name shipment shipment-train
+
+
+This processes and cleans the training and validation sets, runs the training script, and evaluates the model produced from the training.
 
 Each new model version is saved to a timestamped directory name in "models" which includes the model pickle file, the country label encoder, and the metrics on the validation set for that model.  The script also allows you to run each stage separately and to upload a model to S3 to use for a service (not yet included).

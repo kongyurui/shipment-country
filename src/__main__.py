@@ -28,30 +28,33 @@ def main(args):
         da = DataAcquisition()
         da.acquire("ds-project-train.csv", "training")
         da.acquire("ds-project-validation.csv", "validation")
-        
+
     if args.train or args.pipeline:
         trainer = ShipmentTrainer()
         version = trainer.train()
 
+        with open("model_version.txt", "w") as version_fd:
+            version_fd.write(version)
+
     if args.evaluate or args.pipeline:
         if not version and not args.version:
             logger.error("Must either train or specify model version to evaluate")
-            
+
         if not version:
             version = args.version
-        
+
         evaluator = Evaluator()
         evaluator.evaluate(version)
-        
+
     if args.upload:
         if not version and not args.version:
             logger.error("Must either train or specify model version to upload model")
-            
+
         if not version:
             version = args.version
         upload_model_files(version)
 
-    
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Shipment Country Model')
     parser.add_argument('-a','--acquire', help='Run data acquisition', action='store_true')

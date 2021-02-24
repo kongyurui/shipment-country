@@ -8,10 +8,10 @@ from preprocess import Preprocessor
 
 class Predictor():
     """Class to run inference over new shipment data to predict country of origin"""
-    
+
     def __init__(self):
         self.preprocessor = Preprocessor()
-    
+
     def load_model(self, version: str):
         "Load model and label encoder"
         model_path = os.path.join(MODEL_DIR, version, MODEL_FILE)
@@ -21,8 +21,8 @@ class Predictor():
 
     def predict(self, instances: pd.DataFrame):
         "Preprocess and predict on incoming data frame"
-        self.preprocessor.preprocess(instances)
-        
-        predictions = self.model.predict(instances)
-        
+        preprocessed_instances = self.preprocessor.preprocess(instances)
+
+        predictions = self.model.predict(preprocessed_instances)
+
         return predictions
